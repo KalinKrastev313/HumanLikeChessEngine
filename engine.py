@@ -16,9 +16,7 @@ class MinMaxEvaluator:
 
     def min_max(self):
         if self.depth == 0 or self.board.is_game_over():
-            begin_eval = time.time()
             move_eval = self.position_evaluator.evaluate_position(self.board)
-            print(time.time() - begin_eval)
             return move_eval
 
         if self.board.turn:
