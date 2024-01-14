@@ -68,11 +68,24 @@ class PositionEvaluator:
     POSITIONAL_EVALUATOR = PositionalEvaluator()
 
     def evaluate_position(self, board: chess.Board):
+        if board.is_game_over():
+            return self.finished_game_evaluation(board)
+
         evaluation = 0
         evaluation += self.MATERIAL_EVALUATOR.get_material_evaluation(board)
         evaluation += self.POSITIONAL_EVALUATOR.get_positional_evaluation(board)
 
         return evaluation
 
+    @staticmethod
+    def finished_game_evaluation(board: chess.Board):
+        # white is True, black is False, None is draw
+        winner = board.outcome().winner
+        if winner is True:
+            return float('inf')
+        if winner is False:
+            return float('-inf')
+        if winner is None:
+            return float(0)
 
 

@@ -1,5 +1,3 @@
-import time
-
 import chess
 from position_evaluator import PositionEvaluator
 
