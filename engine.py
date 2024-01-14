@@ -49,7 +49,13 @@ class Engine:
     MAX_DEPTH = 4
 
     def suggest_move(self, board: chess.Board):
-        depth = self.MAX_DEPTH
-        evaluator = MinMaxEvaluator(None, float('-inf'), float('inf'), depth, board)
+        evaluator = self.create_evaluator(board)
         evaluator.min_max()
         return evaluator.best_move
+
+    def create_evaluator(self, board: chess.Board):
+        return MinMaxEvaluator(best_move=None,
+                               alpha=float('-inf'),
+                               beta=float('inf'),
+                               depth=self.MAX_DEPTH,
+                               board=board)
