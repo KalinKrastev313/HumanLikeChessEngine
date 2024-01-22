@@ -1,9 +1,16 @@
 import chess
 
 positional_values_dict = {
-    'possible_move': 0.1,
-    'one_square_space': 1
+    'possible_move': 0.3,
+    'one_square_space': 0.2,
+    'piece_positioned_in_the_close_center': 0.6,
+    'piece_positioned_in_the_broad_center': 0.4
 }
+
+close_central_squares = [chess.D4, chess.E4, chess.D5, chess.E5]
+broad_central_squares = [chess.C3, chess.D3, chess.E3, chess.F3,
+                         chess.C4, chess.F4, chess.C5, chess.F5,
+                         chess.C6, chess.D6, chess.E6, chess.F6]
 
 
 def total_possible_moves_advantage_evaluation(board: chess.Board):
@@ -30,10 +37,34 @@ def pieces_are_forward(board: chess.Board):
     return evaluation * positional_values_dict['one_square_space']
 
 
+def total_pieces_occupy_list_of_squares(board: chess.Board, list_of_squares, coefficient_name):
+    evaluation = 0
+    for square in list_of_squares:
+        piece = board.piece_at(square)
+        if piece is not None:
+            if piece.color:
+                evaluation += positional_values_dict[coefficient_name]
+            else:
+                evaluation -= positional_values_dict[coefficient_name]
+
+    return evaluation
+
+
+def pieces_in_the_center(board: chess.Board):
+    evaluation = 0
+    evaluation += total_pieces_occupy_list_of_squares(board, close_central_squares,
+                                                      'piece_positioned_in_the_close_center')
+
+    evaluation += total_pieces_occupy_list_of_squares(board, broad_central_squares,
+                                                      'piece_positioned_in_the_broad_center')
+
+    return evaluation
+
+
 positional_evaluation_functions_mapping = {
     'amount_of_possible_moves': total_possible_moves_advantage_evaluation,
-    'space_advantage': pieces_are_forward
-    # 'pieces_in_center': 5,
+    'space_advantage': pieces_are_forward,
+    'pieces_in_center': pieces_in_the_center
     # 'has_knight': 5,
     # 'has_bishop': 5,
     # 'has_rook': 5,
@@ -100,5 +131,3 @@ class PositionEvaluator:
             return float(-2000)
         if winner is None:
             return float(0)
-
-
