@@ -1,8 +1,8 @@
 import chess
 
 positional_values_dict = {
-    'possible_move': 0.3,
-    'one_square_space': 0.2,
+    'possible_move': 0.07,
+    'one_square_space': 0.05,
     'piece_positioned_in_the_close_center': 0.6,
     'piece_positioned_in_the_broad_center': 0.4
 }
@@ -37,7 +37,7 @@ def pieces_are_forward(board: chess.Board):
     return evaluation * positional_values_dict['one_square_space']
 
 
-def total_pieces_occupy_list_of_squares(board: chess.Board, list_of_squares, coefficient_name):
+def total_pieces_occupy_list_of_squares(board: chess.Board, list_of_squares: list, coefficient_name: str):
     evaluation = 0
     for square in list_of_squares:
         piece = board.piece_at(square)
