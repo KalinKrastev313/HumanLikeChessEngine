@@ -26,7 +26,6 @@ class MinMaxEvaluator:
     @staticmethod
     def update_move_list_by_eval(moves_lst: list, worse_eval: float, eval_new_candidate: float,
                                  top_move_candidate: chess.Move, maximizing_side: bool):
-        evals = []
         # The move is better than the current worst move
         if (maximizing_side and eval_new_candidate > worse_eval) or (
                 not maximizing_side and eval_new_candidate < worse_eval):
@@ -34,13 +33,11 @@ class MinMaxEvaluator:
                 if move_with_eval.evaluation == worse_eval:
                     moves_lst.remove(move_with_eval)
                     moves_lst.append(MoveAndEval(top_move_candidate, eval_new_candidate))
-                    evals.append(eval_new_candidate)
                     continue
-                evals.append(move_with_eval.evaluation)
             if maximizing_side:
-                return moves_lst, min(evals)
+                return moves_lst, min(moves_lst, key=lambda move_eval_tuple: move_eval_tuple.evaluation).evaluation
             else:
-                return moves_lst, max(evals)
+                return moves_lst, max(moves_lst, key=lambda move_eval_tuple: move_eval_tuple.evaluation).evaluation
         # The move is not better than the current worst move
         return moves_lst, worse_eval
 
