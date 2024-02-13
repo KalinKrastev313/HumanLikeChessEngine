@@ -7,6 +7,7 @@ MoveAndEval = namedtuple('MoveAndEval', ['move', 'evaluation'])
 
 class MinMaxEvaluator:
     position_evaluator = PositionEvaluator()
+    DEPTH_TO_USE_BRUTE_FORCE = 3
     INTUITION_SPREAD = 20
 
     def __init__(self, best_move, alpha, beta, depth, board: chess.Board):
@@ -18,7 +19,7 @@ class MinMaxEvaluator:
 
     @property
     def use_intuition(self):
-        if self.depth <= 3:
+        if self.depth <= self.DEPTH_TO_USE_BRUTE_FORCE:
             return False
         else:
             return True
@@ -29,14 +30,17 @@ class MinMaxEvaluator:
         # The move is better than the current worst move
         if (maximizing_side and eval_new_candidate > worse_eval) or (
                 not maximizing_side and eval_new_candidate < worse_eval):
-            for move_with_eval in moves_lst:
-                if move_with_eval.evaluation == worse_eval:
-                    moves_lst.remove(move_with_eval)
-                    moves_lst.append(MoveAndEval(top_move_candidate, eval_new_candidate))
-                    continue
+            # To have its efficiency improved
             if maximizing_side:
+                for move_with_eval in moves_lst:
+                    if move_with_eval.evaluation == worse_eval:
+                        moves_lst.remove(move_with_eval)
+                        moves_lst.append(MoveAndEval(top_move_candidate, eval_new_candidate))
+                        continue
                 return moves_lst, min(moves_lst, key=lambda move_eval_tuple: move_eval_tuple.evaluation).evaluation
             else:
+                moves_lst.remove(max(moves_lst, key=lambda move_eval_tuple: move_eval_tuple.evaluation))
+                moves_lst.append(MoveAndEval(top_move_candidate, eval_new_candidate))
                 return moves_lst, max(moves_lst, key=lambda move_eval_tuple: move_eval_tuple.evaluation).evaluation
         # The move is not better than the current worst move
         return moves_lst, worse_eval

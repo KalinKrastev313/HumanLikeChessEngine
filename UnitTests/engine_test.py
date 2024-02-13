@@ -1,6 +1,6 @@
 from unittest.mock import patch
 import chess
-from engine import Engine, MinMaxEvaluator
+from engine import Engine, MinMaxEvaluator, MoveAndEval
 
 from unittest import TestCase
 
@@ -54,6 +54,84 @@ class MinMaxEvaluatorTest(TestCase):
                                          beta=float('inf'),
                                          depth=4,
                                          board=chess.Board())
+
+    def test_brute_force_at_low_depth_left(self):
+        self.evaluator.depth = 3
+        use_intuition = self.evaluator.use_intuition
+
+        self.assertEquals(use_intuition, False)
+
+    def test_use_intuition_when_high_depth_left(self):
+        use_intuition = self.evaluator.use_intuition
+
+        self.assertEquals(use_intuition, True)
+
+    def test_update_move_list_by_eval_when_new_move_is_worse_for_max_side_and_max_side(self):
+        moves_lst, worst_eval = self._test_get_moves_lst_and_its_worst_eval()
+
+        new_moves_lst, worst_eval = self.evaluator.update_move_list_by_eval(moves_lst=moves_lst,
+                                                                            worse_eval=worst_eval,
+                                                                            eval_new_candidate=-1,
+                                                                            top_move_candidate=chess.Move.from_uci('a2a3'),
+                                                                            maximizing_side=True)
+
+        expected_moves_lst, expected_worst_eval = self._test_get_moves_lst_and_its_worst_eval()
+
+        self.assertEquals(new_moves_lst, expected_moves_lst)
+        self.assertEquals(worst_eval, expected_worst_eval)
+
+    def test_update_move_list_by_eval_when_new_move_is_worse_for_max_side_and_min_side(self):
+        moves_lst, worst_eval = self._test_get_moves_lst_and_its_worst_eval()
+
+        new_moves_lst, worst_eval = self.evaluator.update_move_list_by_eval(moves_lst=moves_lst,
+                                                                            worse_eval=worst_eval,
+                                                                            eval_new_candidate=-1,
+                                                                            top_move_candidate=chess.Move.from_uci('a2a3'),
+                                                                            maximizing_side=False)
+
+        expected_moves_lst = [MoveAndEval(chess.Move.from_uci('d2d4'), 1),
+                              MoveAndEval(chess.Move.from_uci('f2f4'), 0),
+                              MoveAndEval(chess.Move.from_uci('a2a3'), -1)]
+        expected_worst_eval = 1
+        self.assertCountEqual(new_moves_lst, expected_moves_lst)
+        self.assertEquals(worst_eval, expected_worst_eval)
+
+    def test_update_move_list_by_eval_when_new_move_is_better_for_max_side_and_max_side(self):
+        moves_lst, worst_eval = self._test_get_moves_lst_and_its_worst_eval()
+
+        new_moves_lst, worst_eval = self.evaluator.update_move_list_by_eval(moves_lst=moves_lst,
+                                                                            worse_eval=worst_eval,
+                                                                            eval_new_candidate=2.5,
+                                                                            top_move_candidate=chess.Move.from_uci('g1f3'),
+                                                                            maximizing_side=True)
+
+        expected_moves_lst = [MoveAndEval(chess.Move.from_uci('g1f3'), 2.5),
+                              MoveAndEval(chess.Move.from_uci('e1e4'), 2),
+                              MoveAndEval(chess.Move.from_uci('d2d4'), 1)]
+        expected_worst_eval = 1
+
+        self.assertCountEqual(new_moves_lst, expected_moves_lst)
+        self.assertEquals(worst_eval, expected_worst_eval)
+
+    def test_update_move_list_by_eval_when_new_move_is_better_for_max_side_and_min_side(self):
+        moves_lst, worst_eval = self._test_get_moves_lst_and_its_worst_eval()
+
+        new_moves_lst, worst_eval = self.evaluator.update_move_list_by_eval(moves_lst=moves_lst,
+                                                                            worse_eval=worst_eval,
+                                                                            eval_new_candidate=-1,
+                                                                            top_move_candidate=chess.Move.from_uci('g1f3'),
+                                                                            maximizing_side=False)
+
+        expected_moves_lst = moves_lst
+        expected_worst_eval = 1
+        self.assertCountEqual(new_moves_lst, expected_moves_lst)
+        self.assertEquals(worst_eval, expected_worst_eval)
+
+    @staticmethod
+    def _test_get_moves_lst_and_its_worst_eval():
+        return [MoveAndEval(chess.Move.from_uci('e1e4'), 2),
+                MoveAndEval(chess.Move.from_uci('d2d4'), 1),
+                MoveAndEval(chess.Move.from_uci('f2f4'), 0)], 0
 
     def test_update_worse_eval_when_new_eval_is_less_and_white_maximizes(self):
         self._run_update_worse_eval_and_assert(worse_eval=2,
