@@ -1,5 +1,7 @@
 import chess
 
+from EvalCollector.evaluation_collector import EvalCollector
+
 positional_values_dict = {
     'possible_move': 0.07,
     'one_square_space': 0.05,
@@ -110,8 +112,30 @@ class PositionalEvaluator:
 class PositionEvaluator:
     MATERIAL_EVALUATOR = MaterialEvaluator()
     POSITIONAL_EVALUATOR = PositionalEvaluator()
+    USE_PREV_EVAL = False
+    EVAL_COLLECTOR = EvalCollector
 
     def evaluate_position(self, board: chess.Board):
+        evaluation = None
+        if self.USE_PREV_EVAL:
+            evaluation = self.check_for_prev_move_eval(board)
+
+        if evaluation and self.USE_PREV_EVAL:
+            return evaluation
+        else:
+            evaluation = self.calculate_evaluation(board)
+
+        self.collect_eval(evaluation, board)
+        return evaluation
+
+    def check_for_prev_move_eval(self, board: chess.Board):
+        if self.USE_PREV_EVAL:
+            return self.EVAL_COLLECTOR(board=board).check_for_prev_eval()
+        else:
+            return None
+
+    def calculate_evaluation(self, board: chess.Board):
+
         if board.is_game_over():
             return self.finished_game_evaluation(board)
 
@@ -120,6 +144,12 @@ class PositionEvaluator:
         evaluation += self.POSITIONAL_EVALUATOR.get_positional_evaluation(board)
 
         return evaluation
+
+    def collect_eval(self, evaluation: float, board: chess.Board):
+        if self.USE_PREV_EVAL:
+            self.EVAL_COLLECTOR(board).add_evaluation(evaluation)
+        # else:
+        #     pass
 
     @staticmethod
     def finished_game_evaluation(board: chess.Board):

@@ -1,3 +1,5 @@
+import time
+
 from engine import Engine
 import chess
 import chess.pgn
@@ -5,15 +7,18 @@ import chess.pgn
 
 def play_a_game():
     board = chess.Board()
-
+    time_lst = []
+    begin =time_lst.append(time.time())
     while not board.is_game_over():
         engine_human = Engine()
         move = engine_human.suggest_move(board)
         board.push(move)
+        time_lst.append(time.time())
         game = chess.pgn.Game.from_board(board)
         print(game)
 
     game = chess.pgn.Game.from_board(board)
+    print(time_lst)
 
     return str(game)
 
