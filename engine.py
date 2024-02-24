@@ -8,7 +8,7 @@ MoveAndEval = namedtuple('MoveAndEval', ['move', 'evaluation'])
 class MinMaxEvaluator:
     position_evaluator = PositionEvaluator()
     DEPTH_TO_USE_BRUTE_FORCE = 3
-    INTUITION_SPREAD = 20
+    INTUITION_SPREAD = 5
 
     def __init__(self, best_move, alpha, beta, depth, board: chess.Board):
         self.best_move = best_move
@@ -36,7 +36,7 @@ class MinMaxEvaluator:
                     if move_with_eval.evaluation == worse_eval:
                         moves_lst.remove(move_with_eval)
                         moves_lst.append(MoveAndEval(top_move_candidate, eval_new_candidate))
-                        continue
+                        break
                 return moves_lst, min(moves_lst, key=lambda move_eval_tuple: move_eval_tuple.evaluation).evaluation
             else:
                 moves_lst.remove(max(moves_lst, key=lambda move_eval_tuple: move_eval_tuple.evaluation))
@@ -110,7 +110,7 @@ class MinMaxEvaluator:
 
 
 class Engine:
-    MAX_DEPTH = 4
+    MAX_DEPTH = 5
 
     def suggest_move(self, board: chess.Board):
         evaluator = self.create_evaluator(board)
