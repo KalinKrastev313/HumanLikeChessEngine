@@ -8,14 +8,17 @@ import chess.pgn
 def play_a_game():
     board = chess.Board()
     time_lst = []
-    begin =time_lst.append(time.time())
+    prev_move_played_at = time.time()
     while not board.is_game_over():
         engine_human = Engine()
         move = engine_human.suggest_move(board)
         board.push(move)
-        time_lst.append(time.time())
         game = chess.pgn.Game.from_board(board)
         print(game)
+        move_duration = time.time() - prev_move_played_at
+        time_lst.append(move_duration)
+        print(move_duration)
+        prev_move_played_at = time.time()
 
     game = chess.pgn.Game.from_board(board)
     print(time_lst)
