@@ -1,31 +1,13 @@
-from EvalCollector.evaluation_collector import EvalCollector
-from evaluation_functions_mappings import *
-from evaluation_functions import *
+from PositionEvaluation.evaluation_functions_mappings import *
+from PositionEvaluation.evaluation_functions import *
 import chess
 
 
 class PositionEvaluator:
-    USE_PREV_EVAL = False
-    EVAL_COLLECTOR = EvalCollector
 
     def evaluate_position(self, board: chess.Board):
-        evaluation = None
-        if self.USE_PREV_EVAL:
-            evaluation = self.check_for_prev_move_eval(board)
-
-        if evaluation and self.USE_PREV_EVAL:
-            return evaluation
-        else:
-            evaluation = self.calculate_evaluation(board)
-
-        self.collect_eval(evaluation, board)
+        evaluation = self.calculate_evaluation(board)
         return evaluation
-
-    def check_for_prev_move_eval(self, board: chess.Board):
-        if self.USE_PREV_EVAL:
-            return self.EVAL_COLLECTOR(board=board).check_for_prev_eval()
-        else:
-            return None
 
     def calculate_evaluation(self, board: chess.Board):
 
@@ -42,10 +24,6 @@ class PositionEvaluator:
                     evaluation += evaluation_functions_mapping[eval_func](piece, square, board)
 
         return evaluation
-
-    def collect_eval(self, evaluation: float, board: chess.Board):
-        if self.USE_PREV_EVAL:
-            self.EVAL_COLLECTOR(board).add_evaluation(evaluation)
 
     @staticmethod
     def finished_game_evaluation(board: chess.Board):

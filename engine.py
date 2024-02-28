@@ -1,5 +1,5 @@
 import chess
-from position_evaluator import PositionEvaluator
+from PositionEvaluation.position_evaluator import PositionEvaluator
 from collections import namedtuple
 
 MoveAndEval = namedtuple('MoveAndEval', ['move', 'evaluation'])

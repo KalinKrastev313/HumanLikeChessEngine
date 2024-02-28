@@ -1,4 +1,4 @@
-from evaluation_functions import piece_is_forward, piece_in_the_center
+from PositionEvaluation.evaluation_functions import piece_is_forward, piece_in_the_center
 
 
 evaluation_functions_mapping = {
