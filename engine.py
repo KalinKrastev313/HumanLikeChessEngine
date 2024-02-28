@@ -85,27 +85,24 @@ class MinMaxEvaluator:
             for move in self.get_moves_to_be_considered():
                 self.board.push(move)
                 move_eval = MinMaxEvaluator(self.best_move, self.alpha, self.beta, self.depth - 1, self.board).min_max()
+                self.board.pop()
                 if move_eval > self.alpha:
                     self.alpha = move_eval
                     self.best_move = move
-
                     if self.beta <= self.alpha:
-                        self.board.pop()
                         return move_eval
-                self.board.pop()
             return self.alpha
 
         if not self.board.turn:
             for move in self.get_moves_to_be_considered():
                 self.board.push(move)
                 move_eval = MinMaxEvaluator(self.best_move, self.alpha, self.beta, self.depth - 1, self.board).min_max()
+                self.board.pop()
                 if move_eval < self.beta:
                     self.beta = move_eval
                     self.best_move = move
                     if self.beta <= self.alpha:
-                        self.board.pop()
                         return move_eval
-                self.board.pop()
             return self.beta
 
 
