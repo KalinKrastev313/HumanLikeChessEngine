@@ -166,4 +166,88 @@ class MinMaxEvaluatorTest(TestCase):
                                                   maximizing_side=maximizing_side)
         actual_returned_new_value = result == candidate_new_eval
         self.assertEquals(actual_returned_new_value, expected_to_return_new_eval)
-    
+
+    def test_min_max_branch_stops_when_game_is_drawn_due_to_repetition_and_returns_eval(self):
+        test_board = chess.Board()
+        moves_to_be_repeated = [chess.Move.from_uci('g1f3'),
+                                chess.Move.from_uci('g8f6'),
+                                chess.Move.from_uci('f3g1'),
+                                chess.Move.from_uci('f6g8')]
+
+        #  python chess :func: outcome doc detects fivefold repetition, but threefold is slower to detect
+        for _ in range(5):
+            for move in moves_to_be_repeated:
+                test_board.push(move)
+
+        self.evaluator.board = test_board
+        position_eval = self.evaluator.min_max()
+        self.assertEquals(position_eval, 0)
+
+    def test_min_max_branch_stops_when_game_is_drawn_due_to_stalemate_and_returns_eval(self):
+        self.evaluator.board = chess.Board(fen='k7/1R6/2K5/8/8/8/8/8 b - - 0 1')
+        position_eval = self.evaluator.min_max()
+        self.assertEquals(position_eval, 0)
+
+    def test_min_max_stops_when_one_side_checkmates_the_other(self):
+        self.evaluator.board = chess.Board(fen='k1R5/8/1K6/8/8/8/8/8 b - - 0 1')
+        self.assertGreaterEqual(self.evaluator.min_max(), 200)
+
+        self.evaluator.board = chess.Board(fen='K1r5/8/1k6/8/8/8/8/8 w - - 0 1')
+        self.assertLessEqual(self.evaluator.min_max(), -200)
+
+    def test_min_max_branch_stops_when_maximum_depth_is_reached(self):
+        self.evaluator.depth = 0
+        with patch.object(self.evaluator.position_evaluator, 'evaluate_position') as position_evaluator:
+            position_evaluator.return_value = 2
+            actual = self.evaluator.min_max()
+
+        self.assertEquals(actual, 2)
+
+    def test_white_finds_better_move_but_not_enough_to_prune(self):
+        self.evaluator.alpha = 2
+        self._test_execute_min_max_then_assert(expected_min_max_eval=4,
+                                               expected_best_move=chess.Move.from_uci('d2d4'))
+
+    def test_white_finds_better_move_enough_to_prune(self):
+        self.evaluator.alpha = 2
+        self.evaluator.beta = 3
+        self._test_execute_min_max_then_assert(expected_min_max_eval=3,
+                                               expected_best_move=chess.Move.from_uci('e2e4'))
+
+    def test_white_doesnt_find_a_better_move(self):
+        self.evaluator.alpha = 5
+        self.evaluator.best_move = chess.Move.from_uci('f2f4')
+        self._test_execute_min_max_then_assert(expected_min_max_eval=5,
+                                               expected_best_move=chess.Move.from_uci('f2f4'))
+
+    def test_black_finds_a_better_move_but_not_enough_to_prune(self):
+        self.evaluator.beta = 5
+        self.evaluator.board.turn = False
+        self._test_execute_min_max_then_assert(expected_min_max_eval=3,
+                                               expected_best_move=chess.Move.from_uci('e2e4'))
+
+    def test_black_finds_a_better_move_enough_to_prune(self):
+        self.evaluator.beta = 5
+        self.evaluator.alpha = 4
+        self.evaluator.board.turn = False
+        self._test_execute_min_max_then_assert(expected_min_max_eval=3,
+                                               expected_best_move=chess.Move.from_uci('e2e4'),
+                                               move_evals_returns=[3, 2])
+
+    def test_black_doesnt_find_a_better_move(self):
+        self.evaluator.beta = 2
+        self.evaluator.best_move = chess.Move.from_uci('g8f6')
+        self.evaluator.board.turn = False
+        self._test_execute_min_max_then_assert(expected_min_max_eval=2,
+                                               expected_best_move=chess.Move.from_uci('g8f6'))
+
+    def _test_execute_min_max_then_assert(self, expected_min_max_eval, expected_best_move, move_evals_returns=None ):
+        with patch.object(self.evaluator, 'get_moves_to_be_considered') as move_generator:
+            move_generator.return_value = [chess.Move.from_uci('e2e4'),
+                                           chess.Move.from_uci('d2d4')]
+            with patch.object(self.evaluator, 'create_a_branch_and_calculate_its_evaluation') as get_move_eval:
+                get_move_eval.side_effect = [3, 4] if not move_evals_returns else move_evals_returns
+                new_eval = self.evaluator.min_max()
+
+        self.assertEquals(new_eval, expected_min_max_eval)
+        self.assertEquals(self.evaluator.best_move, expected_best_move)

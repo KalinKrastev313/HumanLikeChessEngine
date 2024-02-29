@@ -76,6 +76,12 @@ class MinMaxEvaluator:
 
             return [move for move, _ in intuitive_moves]
 
+    def create_a_branch_and_calculate_its_evaluation(self, move: chess.Move):
+        self.board.push(move)
+        move_eval = MinMaxEvaluator(self.best_move, self.alpha, self.beta, self.depth - 1, self.board).min_max()
+        self.board.pop()
+        return move_eval
+
     def min_max(self):
         if self.depth == 0 or self.board.is_game_over():
             move_eval = self.position_evaluator.evaluate_position(self.board)
@@ -83,9 +89,7 @@ class MinMaxEvaluator:
 
         if self.board.turn:
             for move in self.get_moves_to_be_considered():
-                self.board.push(move)
-                move_eval = MinMaxEvaluator(self.best_move, self.alpha, self.beta, self.depth - 1, self.board).min_max()
-                self.board.pop()
+                move_eval = self.create_a_branch_and_calculate_its_evaluation(move)
                 if move_eval > self.alpha:
                     self.alpha = move_eval
                     self.best_move = move
@@ -95,9 +99,7 @@ class MinMaxEvaluator:
 
         if not self.board.turn:
             for move in self.get_moves_to_be_considered():
-                self.board.push(move)
-                move_eval = MinMaxEvaluator(self.best_move, self.alpha, self.beta, self.depth - 1, self.board).min_max()
-                self.board.pop()
+                move_eval = self.create_a_branch_and_calculate_its_evaluation(move)
                 if move_eval < self.beta:
                     self.beta = move_eval
                     self.best_move = move
