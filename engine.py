@@ -59,9 +59,7 @@ class MinMaxEvaluator:
             intuitive_moves = []
             worse_eval = float('-inf') if self.board.turn else float('inf')
             for move in self.board.legal_moves:
-                imag_board = self.board.copy()
-                imag_board.push(move)
-                move_quick_eval = self.position_evaluator.evaluate_position(imag_board)
+                move_quick_eval = self.position_evaluator.evaluate_position_from_move(self.board, move)
                 if len(intuitive_moves) < self.INTUITION_SPREAD:
                     intuitive_moves.append(MoveAndEval(move, move_quick_eval))
                     worse_eval = self.update_worse_eval(worse_eval=worse_eval, candidate_new_eval=move_quick_eval,

@@ -9,6 +9,12 @@ class PositionEvaluator:
         evaluation = self.calculate_evaluation(board)
         return evaluation
 
+    def evaluate_position_from_move(self, board: chess.Board, move: chess.Move):
+        board.push(move)
+        move_eval = self.evaluate_position(board)
+        board.pop()
+        return move_eval
+
     def calculate_evaluation(self, board: chess.Board):
 
         if board.is_game_over():

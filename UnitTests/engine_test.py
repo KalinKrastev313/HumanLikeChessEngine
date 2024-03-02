@@ -1,5 +1,8 @@
 from unittest.mock import patch
 import chess
+
+import PositionEvaluation.position_evaluator
+from PositionEvaluation.position_evaluator import PositionEvaluator
 from engine import Engine, MinMaxEvaluator, MoveAndEval
 
 from unittest import TestCase
@@ -166,6 +169,54 @@ class MinMaxEvaluatorTest(TestCase):
                                                   maximizing_side=maximizing_side)
         actual_returned_new_value = result == candidate_new_eval
         self.assertEquals(actual_returned_new_value, expected_to_return_new_eval)
+
+    def test_get_moves_to_be_considered_returns_all_possible_moves_when_intuition_not_used(self):
+        with patch.object(MinMaxEvaluator, 'use_intuition', False) as use_intuition:
+            moves_to_be_considered = self.evaluator.get_moves_to_be_considered()
+
+        self.assertEquals(list(moves_to_be_considered), list(self.evaluator.board.legal_moves))
+
+    def test_moves_to_be_considered_when_intuition_used_and_possible_moves_are_less_than_intuition_spread(self):
+        self.evaluator.INTUITION_SPREAD = 5
+
+        actual_moves_to_be_considered = self._test_run_get_moves_to_be_considered(len_legal_moves_found=3,
+                                                                                  mocked_evaluations=[1, 2, 3])
+        expected_moves_to_be_considered = [chess.Move.from_uci('c4f7'),
+                                           chess.Move.from_uci('c4e6'),
+                                           chess.Move.from_uci('c4a6')]
+        self.assertEquals(actual_moves_to_be_considered, expected_moves_to_be_considered)
+
+    def test_moves_to_be_considered_when_intuition_used_and_possible_moves_are_more_than_intuition_spread(self):
+        self.evaluator.INTUITION_SPREAD = 3
+
+        actual_moves_to_be_considered = self._test_run_get_moves_to_be_considered(len_legal_moves_found=4,
+                                                                                  mocked_evaluations=[1, 2, 3, 4])
+        expected_moves_to_be_considered = [chess.Move.from_uci('c4e6'),
+                                           chess.Move.from_uci('c4a6'),
+                                           chess.Move.from_uci('c4d5')]
+        self.assertEquals(actual_moves_to_be_considered, expected_moves_to_be_considered)
+
+    def test_moves_to_be_considered_with_intuition_small_intuition_spread_and_minimizing_side(self):
+        self.evaluator.INTUITION_SPREAD = 3
+        self.evaluator.board.turn = False
+
+        actual_moves_to_be_considered = self._test_run_get_moves_to_be_considered(len_legal_moves_found=4,
+                                                                                  mocked_evaluations=[1, 2, 3, 4])
+        expected_moves_to_be_considered = [chess.Move.from_uci('c4f7'),
+                                           chess.Move.from_uci('c4e6'),
+                                           chess.Move.from_uci('c4a6')]
+        self.assertEquals(actual_moves_to_be_considered, expected_moves_to_be_considered)
+
+    def _test_run_get_moves_to_be_considered(self, len_legal_moves_found, mocked_evaluations):
+        with patch.object(chess.Board, 'legal_moves', self._test_get_list_of_moves()[:len_legal_moves_found]) as legal_move_generator:
+            with patch.object(PositionEvaluator, 'evaluate_position_from_move') as move_evaluations:
+                move_evaluations.side_effect = mocked_evaluations
+                return self.evaluator.get_moves_to_be_considered()
+
+    @staticmethod
+    def _test_get_list_of_moves():
+        specific_board = chess.Board(fen='r2qkbnr/ppp2pp1/2np3p/4p2b/2BPP3/2N2N1P/PPP2PP1/R1BQK2R w KQkq - 1 7')
+        return list(specific_board.legal_moves)
 
     def test_min_max_branch_stops_when_game_is_drawn_due_to_repetition_and_returns_eval(self):
         test_board = chess.Board()
