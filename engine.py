@@ -1,8 +1,7 @@
 import chess
 from PositionEvaluation.position_evaluator import PositionEvaluator
-from collections import namedtuple
 
-MoveAndEval = namedtuple('MoveAndEval', ['move', 'evaluation'])
+from calculation_utils import SortedLinkedList, MoveAndEval
 
 
 class MinMaxEvaluator:
@@ -19,60 +18,23 @@ class MinMaxEvaluator:
 
     @property
     def use_intuition(self):
+        # return False
         if self.depth <= self.DEPTH_TO_USE_BRUTE_FORCE:
             return False
         else:
             return True
 
-    @staticmethod
-    def update_move_list_by_eval(moves_lst: list, worse_eval: float, eval_new_candidate: float,
-                                 top_move_candidate: chess.Move, maximizing_side: bool):
-        # The move is better than the current worst move
-        if (maximizing_side and eval_new_candidate > worse_eval) or (
-                not maximizing_side and eval_new_candidate < worse_eval):
-            # To have its efficiency improved
-            if maximizing_side:
-                for move_with_eval in moves_lst:
-                    if move_with_eval.evaluation == worse_eval:
-                        moves_lst.remove(move_with_eval)
-                        moves_lst.append(MoveAndEval(top_move_candidate, eval_new_candidate))
-                        break
-                return moves_lst, min(moves_lst, key=lambda move_eval_tuple: move_eval_tuple.evaluation).evaluation
-            else:
-                moves_lst.remove(max(moves_lst, key=lambda move_eval_tuple: move_eval_tuple.evaluation))
-                moves_lst.append(MoveAndEval(top_move_candidate, eval_new_candidate))
-                return moves_lst, max(moves_lst, key=lambda move_eval_tuple: move_eval_tuple.evaluation).evaluation
-        # The move is not better than the current worst move
-        return moves_lst, worse_eval
-
-    @staticmethod
-    def update_worse_eval(worse_eval: float, candidate_new_eval: float, maximizing_side: bool):
-        if (worse_eval in [float('-inf'), float('inf')]) or (maximizing_side and candidate_new_eval < worse_eval) or\
-                (not maximizing_side and candidate_new_eval > worse_eval):
-            return candidate_new_eval
-        return worse_eval
-
     def get_moves_to_be_considered(self):
         if not self.use_intuition:
             return self.board.legal_moves
         else:
-            intuitive_moves = []
-            worse_eval = float('-inf') if self.board.turn else float('inf')
+            intuitive_moves = SortedLinkedList(max_length=self.INTUITION_SPREAD, maximizing_side=self.board.turn)
+
             for move in self.board.legal_moves:
                 move_quick_eval = self.position_evaluator.evaluate_position_from_move(self.board, move)
-                if len(intuitive_moves) < self.INTUITION_SPREAD:
-                    intuitive_moves.append(MoveAndEval(move, move_quick_eval))
-                    worse_eval = self.update_worse_eval(worse_eval=worse_eval, candidate_new_eval=move_quick_eval,
-                                                        maximizing_side=self.board.turn)
-                    continue
+                intuitive_moves.add_move_and_eval(MoveAndEval(move, move_quick_eval))
 
-                intuitive_moves, worse_eval = self.update_move_list_by_eval(moves_lst=intuitive_moves,
-                                                                            worse_eval=worse_eval,
-                                                                            eval_new_candidate=move_quick_eval,
-                                                                            top_move_candidate=move,
-                                                                            maximizing_side=self.board.turn)
-
-            return [move for move, _ in intuitive_moves]
+            return intuitive_moves.get_moves()
 
     def create_a_branch_and_calculate_its_evaluation(self, move: chess.Move):
         self.board.push(move)
