@@ -16,6 +16,13 @@ positional_values_dict = {
     'piece_positioned_in_the_broad_center': 0.4
 }
 
+pawn_at_rank = {
+    #  On python chess the ranks are from 0 to 7. We trace only for the ranks further on the board where a pawn can be.
+    4: 4,  # white pawn at 5th rank or black pawn at fourth rank
+    5: 5,  # white pawn at 6th rank or black pawn at third rank
+    6: 6,  # white pawn at 7th rank or black pawn at second rank
+}
+
 close_central_squares = [chess.D4, chess.E4, chess.D5, chess.E5]
 broad_central_squares = [chess.C3, chess.D3, chess.E3, chess.F3,
                          chess.C4, chess.F4, chess.C5, chess.F5,

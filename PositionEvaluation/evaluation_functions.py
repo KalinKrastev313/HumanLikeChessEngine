@@ -1,3 +1,5 @@
+import chess
+
 from definitions_and_factor_weights import *
 
 
@@ -36,6 +38,15 @@ def piece_in_the_center(piece: chess.Piece, square: chess.Square, board: chess.B
             return positional_values_dict['piece_positioned_in_the_broad_center']
         else:
             return - positional_values_dict['piece_positioned_in_the_broad_center']
+    return 0
+
+
+def pawn_is_advanced(piece: chess.Piece, square: chess.Square, board: chess.Board):
+    if piece.piece_type == 1:
+        if piece.color and chess.square_rank(square) in range(4, 7):
+            return pawn_at_rank[chess.square_rank(square)]
+        elif not piece.color and chess.square_rank(square) in range(1, 4):
+            return -pawn_at_rank[7 - chess.square_rank(square)]
     return 0
 
 

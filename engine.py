@@ -7,7 +7,7 @@ from calculation_utils import SortedLinkedList, MoveAndEval
 class MinMaxEvaluator:
     position_evaluator = PositionEvaluator()
     DEPTH_TO_USE_BRUTE_FORCE = 3
-    INTUITION_SPREAD = 5
+    INTUITION_SPREAD = 10
 
     def __init__(self, best_move, alpha, beta, depth, board: chess.Board):
         self.best_move = best_move

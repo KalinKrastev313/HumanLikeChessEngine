@@ -1,6 +1,6 @@
 import chess
 
-from calculation_utils import SortedLinkedList, SortedLinkedListNode
+from calculation_utils import SortedLinkedList
 
 from unittest import TestCase
 
