@@ -69,16 +69,26 @@ class MinMaxEvaluator:
 
 
 class Engine:
+    USE_LAST_EVAL = True
     MAX_DEPTH = 5
+    LAST_EVAL = None
 
     def suggest_move(self, board: chess.Board):
         evaluator = self.create_evaluator(board)
         evaluator.min_max()
+        if self.USE_LAST_EVAL:
+            self.LAST_EVAL = evaluator.alpha if board.turn else evaluator.beta
         return evaluator.best_move
 
     def create_evaluator(self, board: chess.Board):
-        return MinMaxEvaluator(best_move=None,
-                               alpha=float('-inf'),
-                               beta=float('inf'),
-                               depth=self.MAX_DEPTH,
-                               board=board)
+        evaluator = MinMaxEvaluator(best_move=None,
+                                    alpha=float('-inf'),
+                                    beta=float('inf'),
+                                    depth=self.MAX_DEPTH,
+                                    board=board)
+        if self.USE_LAST_EVAL:
+            if self.LAST_EVAL and self.LAST_EVAL not in range(-5, 5):
+                evaluator.INTUITION_SPREAD = 5 + abs(self.LAST_EVAL) // 2
+            else:
+                evaluator.INTUITION_SPREAD = 5
+        return evaluator

@@ -36,8 +36,12 @@ class PositionEvaluator:
         # white is True, black is False, None is draw
         winner = board.outcome().winner
         if winner is True:
+            if board.is_checkmate():
+                return float(2030 - (len(board.move_stack) // 2))
             return float(2000)
         if winner is False:
-            return float(-2000)
+            if board.is_checkmate():
+                return -float(2030 - (len(board.move_stack) // 2))
+            return -float(2000)
         if winner is None:
             return float(0)
