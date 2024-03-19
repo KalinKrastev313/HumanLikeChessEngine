@@ -3,7 +3,7 @@ import chess
 from definitions_and_factor_weights import *
 
 
-def get_material_evaluation(piece: chess):
+def get_material_evaluation(piece: chess.Piece):
     value = piece_values_dict[piece.piece_type]
     return value if piece.color == chess.WHITE else -value
 
