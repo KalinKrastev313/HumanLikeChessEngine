@@ -7,6 +7,7 @@ import chess
 
 class EvaluationFunctionsTest(TestCase):
     def setUp(self):
+        self.board = chess.Board(fen='rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
         self.pawn_at_rank = {
             4: 4,
             5: 5,
@@ -55,6 +56,21 @@ class EvaluationFunctionsTest(TestCase):
             actual = total_possible_moves_advantage_evaluation(test_board)
         self.assertEquals(test_board, expected_board)
         self.assertEquals(actual, expected_eval)
+
+    def test_piece_is_forward_when_it_is_white(self):
+        piece = chess.Piece(piece_type=1, color=True)
+        expected_values = [0, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07]
+        self._test_run_piece_is_forward_and_assert(piece, expected_values)
+
+    def test_piece_is_forward_when_it_is_black(self):
+        piece = chess.Piece(piece_type=1, color=False)
+        expected_values = [-0.07, -0.06, -0.05, -0.04, -0.03, -0.02, -0.01, 0]
+        self._test_run_piece_is_forward_and_assert(piece, expected_values)
+
+    def _test_run_piece_is_forward_and_assert(self, piece, expected_values):
+        for square in range(0, 64, 8):
+            actual_value = piece_is_forward(piece, chess.Square(square), self.board)
+            self.assertEquals(actual_value, expected_values[square // 8])
 
     def test_pawn_is_advanced_when_pawn_is_white(self):
         piece = chess.Piece(piece_type=1, color=True)
