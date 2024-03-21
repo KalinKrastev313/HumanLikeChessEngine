@@ -58,29 +58,56 @@ class EvaluationFunctionsTest(TestCase):
         self.assertEquals(actual, expected_eval)
 
     def test_piece_is_forward_when_it_is_white(self):
-        piece = chess.Piece(piece_type=1, color=True)
-        expected_values = [0, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07]
-        self._test_run_piece_is_forward_and_assert(piece, expected_values)
+        self._test_run_piece_is_forward_and_assert(piece=chess.Piece(piece_type=1, color=True),
+                                                   expected_values=[0, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07])
 
     def test_piece_is_forward_when_it_is_black(self):
-        piece = chess.Piece(piece_type=1, color=False)
-        expected_values = [-0.07, -0.06, -0.05, -0.04, -0.03, -0.02, -0.01, 0]
-        self._test_run_piece_is_forward_and_assert(piece, expected_values)
+        self._test_run_piece_is_forward_and_assert(piece=chess.Piece(piece_type=1, color=False),
+                                                   expected_values=[-0.07, -0.06, -0.05, -0.04, -0.03, -0.02, -0.01, 0])
 
     def _test_run_piece_is_forward_and_assert(self, piece, expected_values):
-        for square in range(0, 64, 8):
-            actual_value = piece_is_forward(piece, chess.Square(square), self.board)
-            self.assertEquals(actual_value, expected_values[square // 8])
+        with patch.dict(positional_values_dict, self.positional_values_dict, clear=True):
+            for square in range(0, 64, 8):
+                actual_value = piece_is_forward(piece, chess.Square(square), self.board)
+                self.assertEquals(actual_value, expected_values[square // 8])
+
+    def test_piece_in_the_center_when_in_the_close_center_and_white(self):
+        self._test_run_piece_in_the_center_and_assert(piece=chess.Piece(piece_type=1, color=True),
+                                                      square=chess.Square(28),
+                                                      expected_value=0.6)
+
+    def test_piece_in_the_center_when_in_the_broad_center_and_white(self):
+        self._test_run_piece_in_the_center_and_assert(piece=chess.Piece(piece_type=1, color=True),
+                                                      square=chess.Square(20),
+                                                      expected_value=0.4)
+
+    def test_piece_in_the_center_when_in_the_close_center_and_black(self):
+        self._test_run_piece_in_the_center_and_assert(piece=chess.Piece(piece_type=1, color=False),
+                                                      square=chess.Square(28),
+                                                      expected_value=-0.6)
+
+    def test_piece_in_the_center_when_in_the_broad_center_and_black(self):
+        self._test_run_piece_in_the_center_and_assert(piece=chess.Piece(piece_type=1, color=False),
+                                                      square=chess.Square(20),
+                                                      expected_value=-0.4)
+
+    def test_piece_in_the_center_when_not_in_center_and_black(self):
+        self._test_run_piece_in_the_center_and_assert(piece=chess.Piece(piece_type=1, color=False),
+                                                      square=chess.Square(4),
+                                                      expected_value=0)
+
+    def _test_run_piece_in_the_center_and_assert(self, piece, square, expected_value):
+        with patch.dict(positional_values_dict, self.positional_values_dict, clear=True):
+            actual_value = piece_in_the_center(piece, square, self.board)
+            self.assertEquals(actual_value, expected_value)
 
     def test_pawn_is_advanced_when_pawn_is_white(self):
-        piece = chess.Piece(piece_type=1, color=True)
-        expected_evals = [0, 0, 0, 0, 4, 5, 6, 0]
-        self._test_run_pawn_is_advanced_and_assert(piece, expected_evals)
+        self._test_run_pawn_is_advanced_and_assert(piece=chess.Piece(piece_type=1, color=True),
+                                                   expected_evals=[0, 0, 0, 0, 4, 5, 6, 0])
 
     def test_pawn_is_advanced_when_pawn_is_black(self):
-        piece = chess.Piece(piece_type=1, color=False)
-        expected_evals = [0, -6, -5, -4, 0, 0, 0, 0]
-        self._test_run_pawn_is_advanced_and_assert(piece, expected_evals)
+        self._test_run_pawn_is_advanced_and_assert(piece=chess.Piece(piece_type=1, color=False),
+                                                   expected_evals=[0, -6, -5, -4, 0, 0, 0, 0])
 
     def _test_run_pawn_is_advanced_and_assert(self, piece, expected_evals):
         squares = [chess.Square(square) for square in range(0, 64, 8)]
