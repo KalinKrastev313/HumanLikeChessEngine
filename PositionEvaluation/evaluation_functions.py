@@ -48,16 +48,3 @@ def pawn_is_advanced(piece: chess.Piece, square: chess.Square, board: chess.Boar
         elif not piece.color and chess.square_rank(square) in range(1, 4):
             return -pawn_at_rank[7 - chess.square_rank(square)]
     return 0
-
-
-def get_attackers_defenders_power_disbalance(defender: chess.Piece, square: chess.Square, board: chess.Board):
-    evaluation = 0
-    attackers = board.attackers(not defender.color, square)
-    for attacker_square in attackers:
-        attacker = board.piece_at(attacker_square)
-        if defender.color:
-            evaluation += attacker_attacks_defender_weights_mapping[attacker.piece_type - 1][defender.piece_type - 1]
-        else:
-            evaluation -= attacker_attacks_defender_weights_mapping[attacker.piece_type - 1][defender.piece_type - 1]
-    return evaluation
-
