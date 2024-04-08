@@ -30,8 +30,10 @@ class MinMaxEvaluator:
         else:
             intuitive_moves = SortedLinkedList(max_length=self.INTUITION_SPREAD, maximizing_side=self.board.turn)
 
+            current_board_quick_eval = self.position_evaluator.evaluate_position(self.board)
+
             for move in self.board.legal_moves:
-                move_quick_eval = self.position_evaluator.evaluate_position_from_move(self.board, move)
+                move_quick_eval = self.position_evaluator.evaluate_position_from_move(self.board, move, current_board_quick_eval)
                 intuitive_moves.add_move_and_eval(MoveAndEval(move, move_quick_eval))
 
             return intuitive_moves.get_moves()

@@ -20,14 +20,14 @@ def total_possible_moves_advantage_evaluation(board: chess.Board):
     return -evaluation
 
 
-def piece_is_forward(piece: chess.Piece, square: chess.Square, board: chess.Board):
+def piece_is_forward(piece: chess.Piece, square: chess.Square):
     if piece.color:
         return chess.square_rank(square) * positional_values_dict['one_square_space']
     else:
         return (chess.square_rank(square) - 7) * positional_values_dict['one_square_space']
 
 
-def piece_in_the_center(piece: chess.Piece, square: chess.Square, board: chess.Board):
+def piece_in_the_center(piece: chess.Piece, square: chess.Square):
     if square in close_central_squares:
         if piece.color:
             return positional_values_dict['piece_positioned_in_the_close_center']
@@ -41,7 +41,7 @@ def piece_in_the_center(piece: chess.Piece, square: chess.Square, board: chess.B
     return 0
 
 
-def pawn_is_advanced(piece: chess.Piece, square: chess.Square, board: chess.Board):
+def pawn_is_advanced(piece: chess.Piece, square: chess.Square):
     if piece.piece_type == 1:
         if piece.color and chess.square_rank(square) in range(4, 7):
             return pawn_at_rank[chess.square_rank(square)]

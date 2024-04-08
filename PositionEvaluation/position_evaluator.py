@@ -4,10 +4,28 @@ import chess
 
 
 class PositionEvaluator:
-    def evaluate_position_from_move(self, board: chess.Board, move: chess.Move):
-        board.push(move)
-        move_eval = self.evaluate_position(board)
-        board.pop()
+    def evaluate_position_from_move(self, board: chess.Board, move: chess.Move, current_board_eval: float = None):
+        if not current_board_eval:
+            board.push(move)
+            move_eval = self.evaluate_position(board)
+            board.pop()
+        else:
+            board.push(move)
+            if board.is_game_over():
+                return self.finished_game_evaluation(board)
+
+            move_eval = 0
+            move_eval += total_possible_moves_advantage_evaluation(board)
+
+            board.pop()
+
+            for eval_func in evaluation_functions_mapping:
+                move_eval -= evaluation_functions_mapping[eval_func](board.piece_at(move.from_square), move.from_square)
+                move_eval += evaluation_functions_mapping[eval_func](board.piece_at(move.from_square), move.to_square)
+                captured_piece = board.piece_at(move.to_square)
+                if captured_piece:
+                    move_eval -= evaluation_functions_mapping[eval_func](board.piece_at(move.to_square), move.to_square)
+
         return move_eval
 
     def evaluate_position(self, board: chess.Board):
@@ -22,7 +40,7 @@ class PositionEvaluator:
             if piece is not None:
                 evaluation += get_material_evaluation(piece)
                 for eval_func in evaluation_functions_mapping:
-                    evaluation += evaluation_functions_mapping[eval_func](piece, square, board)
+                    evaluation += evaluation_functions_mapping[eval_func](piece, square)
 
         return evaluation
 
