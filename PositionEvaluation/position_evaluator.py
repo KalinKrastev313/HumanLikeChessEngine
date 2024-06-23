@@ -11,8 +11,11 @@ class PositionEvaluator:
             board.pop()
         else:
             board.push(move)
+
             if board.is_game_over():
-                return self.finished_game_evaluation(board)
+                move_eval = self.finished_game_evaluation(board)
+                board.pop()
+                return move_eval
 
             move_eval = 0
             move_eval += total_possible_moves_advantage_evaluation(board)
