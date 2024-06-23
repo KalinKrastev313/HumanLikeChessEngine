@@ -68,7 +68,7 @@ class EvaluationFunctionsTest(TestCase):
     def _test_run_piece_is_forward_and_assert(self, piece, expected_values):
         with patch.dict(positional_values_dict, self.positional_values_dict, clear=True):
             for square in range(0, 64, 8):
-                actual_value = piece_is_forward(piece, chess.Square(square), self.board)
+                actual_value = piece_is_forward(piece, chess.Square(square))
                 self.assertEquals(actual_value, expected_values[square // 8])
 
     def test_piece_in_the_center_when_in_the_close_center_and_white(self):
@@ -98,7 +98,7 @@ class EvaluationFunctionsTest(TestCase):
 
     def _test_run_piece_in_the_center_and_assert(self, piece, square, expected_value):
         with patch.dict(positional_values_dict, self.positional_values_dict, clear=True):
-            actual_value = piece_in_the_center(piece, square, self.board)
+            actual_value = piece_in_the_center(piece, square)
             self.assertEquals(actual_value, expected_value)
 
     def test_pawn_is_advanced_when_pawn_is_white(self):
@@ -113,5 +113,5 @@ class EvaluationFunctionsTest(TestCase):
         squares = [chess.Square(square) for square in range(0, 64, 8)]
         with patch.dict(pawn_at_rank, self.pawn_at_rank, clear=True):
             for index in range(8):
-                actual = pawn_is_advanced(piece, squares[index], chess.Board(fen='rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'))
+                actual = pawn_is_advanced(piece, squares[index])
                 self.assertEquals(actual, expected_evals[index])
