@@ -3,14 +3,16 @@ import time
 from engine import Engine
 import chess
 import chess.pgn
-
+from chess.polyglot import MemoryMappedReader
 
 def play_a_game():
     board = chess.Board()
     time_lst = []
     prev_move_played_at = time.time()
+    opening_book_white = MemoryMappedReader('data/openings/white_repertoire.bin')
+    opening_book_black = MemoryMappedReader('data/openings/black_repertoire.bin')
+    engine_human = Engine(opening_book_white, opening_book_black)
     while not board.is_game_over():
-        engine_human = Engine()
         move = engine_human.suggest_move(board)
         board.push(move)
         game = chess.pgn.Game.from_board(board)

@@ -1,7 +1,6 @@
 from unittest.mock import patch
 import chess
 
-import PositionEvaluation.position_evaluator
 from PositionEvaluation.position_evaluator import PositionEvaluator
 from engine import Engine, MinMaxEvaluator, MoveAndEval
 

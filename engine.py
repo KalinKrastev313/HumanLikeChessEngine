@@ -2,6 +2,7 @@ import chess
 from PositionEvaluation.position_evaluator import PositionEvaluator
 
 from calculation_utils import SortedLinkedList, MoveAndEval
+from chess.polyglot import MemoryMappedReader
 
 
 class MinMaxEvaluator:
@@ -74,8 +75,18 @@ class Engine:
     USE_LAST_EVAL = True
     MAX_DEPTH = 5
     LAST_EVAL = None
+    USE_OPENING_BOOKS = True
+
+    def __init__(self, opening_book_white=None, opening_book_black=None):
+        self.opening_book_white = opening_book_white
+        self.opening_book_black = opening_book_black
 
     def suggest_move(self, board: chess.Board):
+        if self.USE_OPENING_BOOKS:
+            book_move = self.opening_book_white.get(board) if board.turn else self.opening_book_black.get(board)
+            if book_move:
+                return book_move.move
+
         evaluator = self.create_evaluator(board)
         evaluator.min_max()
         if self.USE_LAST_EVAL:
