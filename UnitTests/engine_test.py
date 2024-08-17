@@ -1,15 +1,22 @@
 from unittest.mock import patch
 import chess
 
+import os
 from PositionEvaluation.position_evaluator import PositionEvaluator
 from engine import Engine, MinMaxEvaluator, MoveAndEval
-
+from chess.polyglot import MemoryMappedReader
 from unittest import TestCase
 
 
 class EngineTest(TestCase):
     def setUp(self):
-        self.engine = Engine()
+        self.base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        self.book_white_path = os.path.join(self.base_dir, 'data/openings/white_repertoire.bin')
+        self.book_black_path = os.path.join(self.base_dir, 'data/openings/black_repertoire.bin')
+        opening_book_white = MemoryMappedReader(self.book_white_path)
+        opening_book_black = MemoryMappedReader(self.book_black_path)
+
+        self.engine = Engine(opening_book_white, opening_book_black)
         self.engine.MAX_DEPTH = 1
 
     def test_create_evaluator(self):

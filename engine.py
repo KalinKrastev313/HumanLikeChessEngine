@@ -81,9 +81,17 @@ class Engine:
         self.opening_book_white = opening_book_white
         self.opening_book_black = opening_book_black
 
+    def read_opening_book(self, board: chess.Board):
+        if board.turn and self.opening_book_white:
+            return self.opening_book_white.get(board)
+        elif self.opening_book_black:
+            return self.opening_book_black.get(board)
+        else:
+            return None
+
     def suggest_move(self, board: chess.Board):
         if self.USE_OPENING_BOOKS:
-            book_move = self.opening_book_white.get(board) if board.turn else self.opening_book_black.get(board)
+            book_move = self.read_opening_book(board)
             if book_move:
                 return book_move.move
 
