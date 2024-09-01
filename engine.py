@@ -76,7 +76,7 @@ class Engine:
     USE_LAST_EVAL = True
     MAX_DEPTH = 5
     LAST_EVAL = None
-    USE_OPENING_BOOKS = False
+    USE_OPENING_BOOKS = True
 
     def __init__(self, opening_book_white=None, opening_book_black=None):
         self.opening_book_white = opening_book_white
