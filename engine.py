@@ -10,12 +10,13 @@ class MinMaxEvaluator:
     DEPTH_TO_USE_BRUTE_FORCE = 3
     INTUITION_SPREAD = 10
 
-    def __init__(self, best_move, alpha, beta, depth, board: chess.Board):
+    def __init__(self, best_move, alpha, beta, depth, board: chess.Board, board_static_eval=None):
         self.best_move = best_move
         self.alpha = alpha
         self.beta = beta
         self.depth = depth
         self.board = board
+        self.board_static_eval = board_static_eval
 
     @property
     def use_intuition(self):
@@ -31,10 +32,10 @@ class MinMaxEvaluator:
         else:
             intuitive_moves = SortedLinkedList(max_length=self.INTUITION_SPREAD, maximizing_side=self.board.turn)
 
-            current_board_quick_eval = self.position_evaluator.evaluate_position(self.board)
+            current_board_quick_eval = self.board_static_eval if self.board_static_eval else self.position_evaluator.evaluate_position(self.board)
 
             for move in self.board.legal_moves:
-                move_quick_eval = self.position_evaluator.evaluate_position_from_move(self.board, move, current_board_quick_eval)
+                move_quick_eval = self.position_evaluator.evaluate_position_statically_from_move(self.board, move, current_board_quick_eval)
                 intuitive_moves.add_move_and_eval(MoveAndEval(move, move_quick_eval))
 
             return intuitive_moves.get_moves()
@@ -47,7 +48,7 @@ class MinMaxEvaluator:
 
     def min_max(self):
         if self.depth == 0 or self.board.is_game_over():
-            move_eval = self.position_evaluator.evaluate_position(self.board)
+            move_eval = self.position_evaluator.evaluate_position(self.board, dynamic_evaluation=True)
             return move_eval
 
         if self.board.turn:
@@ -75,7 +76,7 @@ class Engine:
     USE_LAST_EVAL = True
     MAX_DEPTH = 5
     LAST_EVAL = None
-    USE_OPENING_BOOKS = True
+    USE_OPENING_BOOKS = False
 
     def __init__(self, opening_book_white=None, opening_book_black=None):
         self.opening_book_white = opening_book_white

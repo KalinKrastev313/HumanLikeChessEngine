@@ -89,12 +89,17 @@ class SortedLinkedList:
 
     def get_moves(self):
         node = self.smallest_node
-        lst = [node.move]
+        yield node.move
         while node.parent_node:
-            lst.append(node.parent_node.move)
+            yield node.parent_node.move
             node = node.parent_node
 
-        return lst
+    def get_nodes(self):
+        node = self.smallest_node
+        yield node
+        while node.parent_node:
+            yield node.parent_node
+            node = node.parent_node
 
 
 class SortedLinkedListNode:
