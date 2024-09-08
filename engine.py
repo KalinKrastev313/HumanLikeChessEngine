@@ -48,7 +48,7 @@ class MinMaxEvaluator:
 
     def min_max(self):
         if self.depth == 0 or self.board.is_game_over():
-            move_eval = self.position_evaluator.evaluate_position(self.board, dynamic_evaluation=True)
+            move_eval = self.position_evaluator.evaluate_position(self.board)
             return move_eval
 
         if self.board.turn:
@@ -76,7 +76,7 @@ class Engine:
     USE_LAST_EVAL = True
     MAX_DEPTH = 5
     LAST_EVAL = None
-    USE_OPENING_BOOKS = True
+    USE_OPENING_BOOKS = False
 
     def __init__(self, opening_book_white=None, opening_book_black=None):
         self.opening_book_white = opening_book_white

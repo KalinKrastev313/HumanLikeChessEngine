@@ -40,12 +40,11 @@ class PositionEvaluator:
         evaluation = 0
         evaluation += total_possible_moves_advantage_evaluation(board) if dynamic_evaluation else 0
         if static_evaluation:
-            for square in chess.SQUARES:
+            for square in chess.SquareSet(board.occupied):
                 piece = board.piece_at(square)
-                if piece is not None:
-                    evaluation += get_material_evaluation(piece)
-                    for eval_func in evaluation_functions_mapping:
-                        evaluation += evaluation_functions_mapping[eval_func](piece, square)
+                evaluation += get_material_evaluation(piece)
+                for eval_func in evaluation_functions_mapping:
+                    evaluation += evaluation_functions_mapping[eval_func](piece, square)
 
         return evaluation
 
